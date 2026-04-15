@@ -1,0 +1,90 @@
+body {
+    margin: 0;
+    font-family: Arial;
+}
+
+/* HERO */
+.hero {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: url("images/hero-bg.jpg") no-repeat center/cover;
+    color: white;
+    text-align: center;
+    position: relative;
+}
+
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+}
+
+.hero div {
+    position: relative;
+    z-index: 2;
+}
+
+/* LOGO */
+.logo {
+    width: 120px;
+    margin-bottom: 20px;
+}
+
+/* BUTTONS */
+.start-btn {
+    padding: 10px 20px;
+    font-size: 16px;
+}
+
+/* LOGIN BTN */
+.login-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+/* SIDEBAR */
+.sidebar {
+    position: fixed;
+    right: 0;
+    top: 40%;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* MODAL */
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* PROFILE */
+.avatar {
+    width: 100px;
+    border-radius: 50%;
+}
+
+/* DARK MODE */
+.dark {
+    background: #121212;
+    color: white;
+}
+
+.dark .modal-content {
+    background: #222;
+    color: white;
+}

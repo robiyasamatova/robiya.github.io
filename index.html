@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MedSphere</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- LOGIN BUTTON -->
+<button class="login-btn" onclick="openLogin()">Log In</button>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+    <button onclick="toggleDarkMode()">🌙 Dark Mode</button>
+    <button onclick="openProfile()">👤 Profile</button>
+</div>
+
+<!-- HERO SECTION -->
+<section class="hero">
+    <div>
+        <img src="images/logo.png" class="logo">
+        <h1>Explore the Human Body Systems</h1>
+        <p>Learn medicine through structured systems</p>
+        <button class="start-btn">Start Learning</button>
+    </div>
+</section>
+
+<!-- LOGIN MODAL -->
+<div class="modal" id="loginModal">
+    <div class="modal-content">
+        <h2>Register</h2>
+        <input type="text" id="fullName" placeholder="Full Name">
+        <input type="text" id="username" placeholder="Username">
+        <input type="email" id="email" placeholder="Email">
+        <input type="password" id="password" placeholder="Password">
+        <button onclick="register()">Register</button>
+
+        <h3>Login</h3>
+        <input type="email" id="loginEmail" placeholder="Email">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <button onclick="login()">Login</button>
+    </div>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="modal" id="profileModal">
+    <div class="modal-content">
+        <h2>Profile</h2>
+        <img id="avatar" class="avatar">
+        <input type="file" onchange="uploadAvatar(event)">
+        <h3 id="usernameDisplay"></h3>
+        <p id="fullNameDisplay"></p>
+    </div>
+</div>
+
+<script>
+const API = "http://localhost:5000/api";
+
+/* MODALS */
+function openLogin() {
+    document.getElementById("loginModal").style.display = "flex";
+}
+
+function openProfile() {
+    document.getElementById("profileModal").style.display = "flex";
+}
+
+/* REGISTER */
+async function register() {
+    await fetch(API + "/auth/register", {
+        method: "POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            fullName: fullName.value,
+            username: username.value,
+            email: email.value,
+            password: password.value
+        })
+    });
+    alert("Registered!");
+}
+
+/* LOGIN */
+async function login() {
+    const res = await fetch(API + "/auth/login", {
+        method:"POST",
+        headers: {"Content-Type":"application/json"},
+        body: JSON.stringify({
+            email: loginEmail.value,
+            password: loginPassword.value
+        })
+    });
+
+    const data = await res.json();
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+
+    loadProfile();
+}
+
+/* LOAD PROFILE */
+function loadProfile() {
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    usernameDisplay.innerText = user.username;
+    fullNameDisplay.innerText = user.fullName;
+
+    if (user.avatar) {
+        avatar.src = "http://localhost:5000/" + user.avatar;
+    } else {
+        avatar.src = "https://via.placeholder.com/100";
+    }
+
+    if (user.darkMode) {
+        document.body.classList.add("dark");
+    }
+}
+
+/* UPLOAD AVATAR */
+async function uploadAvatar(e) {
+    const file = e.target.files[0];
+    const formData = new FormData();
+    formData.append("avatar", file);
+
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const res = await fetch(API + "/user/upload-avatar/" + user._id, {
+        method: "POST",
+        headers: {
+            Authorization: "Bearer " + token
+        },
+        body: formData
+    });
+
+    const data = await res.json();
+    avatar.src = "http://localhost:5000/" + data.avatar;
+}
+
+/* DARK MODE */
+async function toggleDarkMode() {
+    document.body.classList.toggle("dark");
+
+    const token = localStorage.getItem("token");
+    const user = JSON.parse(localStorage.getItem("user"));
+
+    const res = await fetch(API + "/user/dark-mode/" + user._id, {
+        method: "POST",
+        headers: {
+            "Content-Type":"application/json",
+            Authorization:"Bearer " + token
+        },
+        body: JSON.stringify({
+            darkMode: document.body.classList.contains("dark")
+        })
+    });
+
+    const updatedUser = await res.json();
+    localStorage.setItem("user", JSON.stringify(updatedUser));
+}
+
+/* AUTO LOAD */
+window.onload = () => {
+    if (localStorage.getItem("user")) {
+        loadProfile();
+    }
+}
+</script>
+
+</body>
+</html>
